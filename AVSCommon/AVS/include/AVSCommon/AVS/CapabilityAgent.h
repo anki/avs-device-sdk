@@ -13,6 +13,10 @@
  * permissions and limitations under the License.
  */
 
+ /*
+ <ANKI></ANKI> modifications copyright (C) 2018 Anki, Inc.
+ */
+
 #ifndef ALEXA_CLIENT_SDK_AVSCOMMON_AVS_INCLUDE_AVSCOMMON_AVS_CAPABILITYAGENT_H_
 #define ALEXA_CLIENT_SDK_AVSCOMMON_AVS_INCLUDE_AVSCOMMON_AVS_CAPABILITYAGENT_H_
 
@@ -49,6 +53,12 @@ class CapabilityAgent
         , public sdkInterfaces::ChannelObserverInterface
         , public sdkInterfaces::StateProviderInterface
         , public sdkInterfaces::ContextRequesterInterface {
+
+// <ANKI>
+protected:
+    class DirectiveInfo;
+// </ANKI>
+
 public:
     /**
      * Destructor.
@@ -82,6 +92,12 @@ public:
     void onContextAvailable(const std::string& jsonContext) override;
 
     void onContextFailure(const sdkInterfaces::ContextRequestError error) override;
+
+    // <ANKI> (These used to be protected. Now they're public to get directive info for debugging)
+    virtual void preHandleDirective(std::shared_ptr<DirectiveInfo> info) = 0;
+    virtual void handleDirective(std::shared_ptr<DirectiveInfo> info) = 0;
+    virtual void cancelDirective(std::shared_ptr<DirectiveInfo> info) = 0;
+    // </ANKI>
 
 protected:
     /**
@@ -151,7 +167,9 @@ protected:
      *
      * @param info The @c DirectiveInfo instance for the @c AVSDirective to process.
      */
-    virtual void preHandleDirective(std::shared_ptr<DirectiveInfo> info) = 0;
+    // <ANKI> (made public)
+    //virtual void preHandleDirective(std::shared_ptr<DirectiveInfo> info) = 0;
+    // </ANKI>
 
     /**
      * Handle the action specified by the @c AVSDirective in @c info. The handling of subsequent directives with
@@ -165,7 +183,9 @@ protected:
      *
      * @param info The @c DirectiveInfo instance for the @c AVSDirective to process.
      */
-    virtual void handleDirective(std::shared_ptr<DirectiveInfo> info) = 0;
+    // <ANKI> (made public)
+    //virtual void handleDirective(std::shared_ptr<DirectiveInfo> info) = 0;
+    // </ANKI>
 
     /**
      * Cancel an ongoing @c preHandleDirective() or @c handleDirective() operation for the @c AVSDirective in
@@ -178,7 +198,9 @@ protected:
      *
      * @param info The @c DirectiveInfo instance for the @c AVSDirective to process.
      */
-    virtual void cancelDirective(std::shared_ptr<DirectiveInfo> info) = 0;
+    // <ANKI> (made public)
+    //virtual void cancelDirective(std::shared_ptr<DirectiveInfo> info) = 0;
+    // </ANKI>
 
     /**
      * This function releases resources associated with the @c AVSDirective which is no longer in use by a
