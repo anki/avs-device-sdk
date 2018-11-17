@@ -152,6 +152,12 @@ public:
     void shutdown();
 
     /**
+     * Refresh timers. This can be called if the system clock time changes to reset the timers so that they go
+     * off at the correct time
+     */
+    void refreshTimers();
+
+    /**
      * Utility method to get list of all alerts being tracked by @c AlertScheduler
      *
      * @return list of all alerts being tracked by @c AlertScheduler

@@ -327,6 +327,11 @@ void AlertScheduler::shutdown() {
     m_scheduledAlerts.clear();
 }
 
+void AlertScheduler::refreshTimers()
+{
+  setTimerForNextAlert();
+}
+
 void AlertScheduler::executeOnAlertStateChange(std::string alertToken, State state, std::string reason) {
     ACSDK_DEBUG9(LX("executeOnAlertStateChange").d("alertToken", alertToken).d("state", state).d("reason", reason));
     std::lock_guard<std::mutex> lock(m_mutex);
