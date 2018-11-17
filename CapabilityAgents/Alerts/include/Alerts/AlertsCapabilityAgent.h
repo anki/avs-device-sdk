@@ -165,6 +165,12 @@ public:
      */
     void clearData() override;
 
+    /**
+     * Refresh timers. This can be called if the system clock time changes to reset the timers so that they go
+     * off at the correct time
+     */
+    void refreshTimers();
+
 private:
     /**
      * Constructor.

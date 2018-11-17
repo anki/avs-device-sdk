@@ -902,6 +902,11 @@ void AlertsCapabilityAgent::clearData() {
     result.wait();
 }
 
+void AlertsCapabilityAgent::refreshTimers() {
+  ACSDK_DEBUG9(LX("refreshTimers"));
+  m_alertScheduler.refreshTimers();
+}
+
 std::unordered_set<std::shared_ptr<avsCommon::avs::CapabilityConfiguration>> AlertsCapabilityAgent::
     getCapabilityConfigurations() {
     return m_capabilityConfigurations;
