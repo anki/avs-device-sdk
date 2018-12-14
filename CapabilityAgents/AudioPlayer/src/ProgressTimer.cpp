@@ -166,15 +166,23 @@ void ProgressTimer::resume() {
 void ProgressTimer::stop() {
     ACSDK_DEBUG5(LX(__func__));
 
+    auto cleanup = [this] {
+      m_context.reset();
+      m_delay = NO_DELAY;
+      m_interval = NO_INTERVAL;
+      m_target = std::chrono::milliseconds::zero();
+    };
+
+    std::lock_guard<std::mutex> callLock(m_callMutex);
+
     // If we are already stopped, there is nothing to do.
     {
         std::lock_guard<std::mutex> stateLock(m_stateMutex);
         if (State::IDLE == m_state) {
+            cleanup();
             return;
         }
     }
-
-    std::lock_guard<std::mutex> callLock(m_callMutex);
 
     if (!setState(State::STOPPING)) {
         ACSDK_ERROR(LX("stopFailed").d("reason", "setStateFailed"));
@@ -190,10 +198,7 @@ void ProgressTimer::stop() {
         return;
     }
 
-    m_context.reset();
-    m_delay = NO_DELAY;
-    m_interval = NO_INTERVAL;
-    m_target = std::chrono::milliseconds::zero();
+    cleanup();
 }
 
 void ProgressTimer::onProgress(std::chrono::milliseconds progress) {
