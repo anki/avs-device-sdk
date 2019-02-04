@@ -61,16 +61,50 @@ TEST(TimeTest, testStringConversionNullParam) {
 }
 
 TEST(TimeTest, testTimeConversion) {
-    TimeUtils timeUtils;
-    std::time_t randomDate = 524089800;
-    std::tm date;
-    auto safeCTimeAccess = SafeCTimeAccess::instance();
-    ASSERT_TRUE(safeCTimeAccess->getGmtime(randomDate, &date));
-    std::time_t convertBack;
-    auto success = timeUtils.convertToUtcTimeT(&date, &convertBack);
 
-    ASSERT_TRUE(success);
-    ASSERT_EQ(randomDate, convertBack);
+    auto testDate = []( std::time_t date, const char* tzStr=nullptr) {
+        char* tzOld = nullptr;
+        bool tzReset = false;
+
+        if( tzStr != nullptr ) {
+            tzReset = true;
+            tzOld = getenv("TZ");
+            setenv("TZ", tzStr, 1);
+            tzset();
+        }
+        
+        if( tzOld != nullptr ) {
+            setenv("TZ", tzOld, 1);
+            tzset();
+        } else if( tzReset ) {
+            unsetenv("TZ");
+            tzset();
+        }
+
+        TimeUtils timeUtils;
+        std::tm tmDate;
+        auto safeCTimeAccess = SafeCTimeAccess::instance();
+        ASSERT_TRUE(safeCTimeAccess->getGmtime(date, &tmDate));
+        std::time_t convertBack;
+        auto success = timeUtils.convertToUtcTimeT(&tmDate, &convertBack);
+        ASSERT_TRUE(success);
+        ASSERT_EQ(date, convertBack);
+    };
+    
+    const std::time_t randomDate = 524089800;
+    testDate( randomDate );
+    testDate( randomDate, "" );
+    testDate( randomDate, "Europe/London" );
+
+    const std::time_t justBeforeBritishSummerTime = 1553992200;
+    testDate( justBeforeBritishSummerTime );
+    testDate( justBeforeBritishSummerTime, "" );
+    testDate( justBeforeBritishSummerTime, "Europe/London" );
+
+    const std::time_t justAfterBritishSummerTime = 1553995800;
+    testDate( justAfterBritishSummerTime );
+    testDate( justAfterBritishSummerTime, "" );
+    testDate( justAfterBritishSummerTime, "Europe/London" );
 }
 
 TEST(TimeTest, testCurrentTime) {

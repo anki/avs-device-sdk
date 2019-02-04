@@ -42,8 +42,7 @@ public:
     /**
      * Convert tm struct to time_t in UTC time
      *
-     * This function is needed because mktime uses the current timezone. Hence, we calculate the current timezone
-     * difference, and adjust the converted time.
+     * This function is needed because mktime uses the current timezone. 
      *
      * @param utcTm time to be converted. This should be in UTC time
      * @param[out] ret The converted UTC time to time_t
@@ -114,7 +113,8 @@ private:
      * @param[out] ret Required pointer to object where the result will be saved.
      * @return Whether it succeeded to calculate the localtime offset.
      */
-    bool localtimeOffset(std::time_t* ret);
+    // ERROR PRONE:
+    // bool localtimeOffset(std::time_t* ret);
 
     /// Object used to safely access the system ctime functions.
     std::shared_ptr<SafeCTimeAccess> m_safeCTimeAccess;
