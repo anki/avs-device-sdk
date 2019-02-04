@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-// PORTIONS LICENSED UNDER
+// WHEN NOT ON LINUX, PORTIONS LICENSED UNDER
 /**
  *   Copyright 2011-2015 Quickstep Technologies LLC.
  *   Copyright 2015 Pivotal Software, Inc.
@@ -37,10 +37,17 @@
 #include <mutex>
 #include <random>
 #include <sstream>
+#include <time.h>
 
 #include "AVSCommon/Utils/Timing/TimeUtils.h"
 #include "AVSCommon/Utils/Logger/Logger.h"
 #include "AVSCommon/Utils/String/StringUtils.h"
+
+#ifndef __linux__
+  #define USE_CUSTOM_TIMEGM 1
+#else 
+  #define USE_CUSTOM_TIMEGM 0
+#endif
 
 namespace alexaClientSDK {
 namespace avsCommon {
@@ -121,19 +128,21 @@ static const unsigned long ENCODED_TIME_STRING_EXPECTED_LENGTH =
  * @param[out] ret Required pointer to object where the result will be saved.
  * @return Whether the conversion was successful.
  */
-static bool convertToLocalTimeT(const std::tm* timeStruct, std::time_t* ret) {
-    if (timeStruct == nullptr) {
-        return false;
-    }
+// UNUSED FOR NOW. SEE COMMENT IN convertToUtcTimeT
+// static bool convertToLocalTimeT(const std::tm* timeStruct, std::time_t* ret) {
+//     if (timeStruct == nullptr) {
+//         return false;
+//     }
 
-    std::tm tmCopy = *timeStruct;
-    *ret = std::mktime(&tmCopy);
-    return *ret >= 0;
-}
+//     std::tm tmCopy = *timeStruct;
+//     *ret = std::mktime(&tmCopy);
+//     return *ret >= 0;
+// }
 
 TimeUtils::TimeUtils() : m_safeCTimeAccess{SafeCTimeAccess::instance()} {
 }
 
+#if USE_CUSTOM_TIMEGM
 // BEGIN LICENSED UNDER APACHE FROM PIVOTAL SOFTWARE
 namespace {
     constexpr std::time_t kSecondsInMinute = 60;
@@ -224,6 +233,7 @@ std::time_t timegmCustom(const struct std::tm *tm) {
   return time;
 }
 // END LICENSED UNDER APACHE FROM PIVOTAL SOFTWARE
+#endif
 
 bool TimeUtils::convertToUtcTimeT(const std::tm* utcTm, std::time_t* ret) {
     if (ret == nullptr) {
@@ -242,7 +252,12 @@ bool TimeUtils::convertToUtcTimeT(const std::tm* utcTm, std::time_t* ret) {
     // adjust converted time
     // *ret = converted - offset;
 
-    *ret = timegmCustom(utcTm);
+    #if USE_CUSTOM_TIMEGM
+        *ret = timegmCustom(utcTm);
+    #else 
+        std::tm cpy = *utcTm;
+        *ret = timegm(&cpy);
+    #endif
 
     return true;
 }
